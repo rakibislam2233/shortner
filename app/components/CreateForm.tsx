@@ -44,19 +44,14 @@ export default function CreateForm() {
   }
 
   return (
-    <div
-      style={{
-        maxWidth: "600px",
-        margin: "2rem auto",
-        padding: "1rem",
-        border: "1px solid #ccc",
-        borderRadius: "8px",
-      }}
-    >
+    <div className="w-full container mx-auto ">
       <h1 style={{ textAlign: "center" }}>Create a Short URL</h1>
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         <div style={{ marginBottom: "1rem" }}>
-          <label htmlFor="id" style={{ display: "block", marginBottom: "0.5rem" }}>
+          <label
+            htmlFor="id"
+            style={{ display: "block", marginBottom: "0.5rem" }}
+          >
             Custom ID
           </label>
           <input
@@ -68,7 +63,10 @@ export default function CreateForm() {
           />
         </div>
         <div style={{ marginBottom: "1rem" }}>
-          <label htmlFor="image" style={{ display: "block", marginBottom: "0.5rem" }}>
+          <label
+            htmlFor="image"
+            style={{ display: "block", marginBottom: "0.5rem" }}
+          >
             Loading Image (GIF)
           </label>
           <input
@@ -81,7 +79,10 @@ export default function CreateForm() {
           />
         </div>
         <div style={{ marginBottom: "1rem" }}>
-          <label htmlFor="mobile" style={{ display: "block", marginBottom: "0.5rem" }}>
+          <label
+            htmlFor="mobile"
+            style={{ display: "block", marginBottom: "0.5rem" }}
+          >
             Mobile URL
           </label>
           <input
@@ -94,7 +95,10 @@ export default function CreateForm() {
           />
         </div>
         <div style={{ marginBottom: "1rem" }}>
-          <label htmlFor="desktop" style={{ display: "block", marginBottom: "0.5rem" }}>
+          <label
+            htmlFor="desktop"
+            style={{ display: "block", marginBottom: "0.5rem" }}
+          >
             Desktop URL
           </label>
           <input
@@ -119,9 +123,7 @@ export default function CreateForm() {
           Your short URL: <a href={shortUrl}>{shortUrl}</a>
         </p>
       )}
-      {error && (
-        <p style={{ color: "red", marginTop: "1rem" }}>{error}</p>
-      )}
+      {error && <p style={{ color: "red", marginTop: "1rem" }}>{error}</p>}
     </div>
   );
 }

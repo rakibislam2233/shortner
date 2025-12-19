@@ -1,13 +1,15 @@
-import { NextResponse } from 'next/server';
+// Fixed: API route for user logout
+import { NextRequest, NextResponse } from "next/server";
 
-/**
- * POST handler for logging out a user. It simply clears the
- * `username` cookie by setting an empty value with an expired
- * maxAge. Clients should call this endpoint to sign out.
- */
-export async function POST() {
-  const res = NextResponse.json({ success: true });
-  // Clear the cookie by setting maxAge to 0
-  res.cookies.set('username', '', { path: '/', maxAge: 0 });
-  return res;
+export async function POST(req: NextRequest) {
+  // Create response and clear the username cookie
+  const response = NextResponse.json({ success: true });
+  response.cookies.set("username", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 0, // Expire immediately
+    path: "/",
+  });
+
+  return response;
 }

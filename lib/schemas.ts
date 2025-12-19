@@ -26,3 +26,14 @@ export const loginSchema = z.object({
     .min(1, 'Password is required')
     .max(100, 'Password is too long')
 });
+
+// Schema for validating registration form
+export const registerSchema = z.object({
+  username: z.string()
+    .min(3, 'Username must be at least 3 characters')
+    .max(30, 'Username must be at most 30 characters')
+    .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers, and underscores'),
+  password: z.string()
+    .min(6, 'Password must be at least 6 characters')
+    .max(100, 'Password is too long')
+});

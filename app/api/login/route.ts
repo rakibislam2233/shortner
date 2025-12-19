@@ -3,24 +3,26 @@ import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import User from "@/models/User";
 import bcrypt from "bcrypt";
+import { loginSchema } from "@/lib/schemas";
 
 export async function POST(req: NextRequest) {
   try {
     const { username, password } = await req.json();
 
-    // Validate input
-    if (!username || !password) {
-      return NextResponse.json(
-        { error: "Username and password are required" },
-        { status: 400 }
-      );
+    // Validate input using the login schema
+    const validatedData = loginSchema.safeParse({ username, password });
+    if (!validatedData.success) {
+      const errors = validatedData.error.errors.map(e => e.message).join(', ');
+      return NextResponse.json({ error: `Validation error: ${errors}` }, { status: 400 });
     }
+
+    const { username: validatedUsername, password: validatedPassword } = validatedData.data;
 
     // Connect to database
     await dbConnect();
 
     // Find user
-    const user = await User.findOne({ username: username.toLowerCase() });
+    const user = await User.findOne({ username: validatedUsername.toLowerCase() }).exec();
     if (!user) {
       return NextResponse.json(
         { error: "Invalid credentials" },
@@ -29,7 +31,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Compare password
-    const isValidPassword = await bcrypt.compare(password, user.password);
+    const isValidPassword = await bcrypt.compare(validatedPassword, user.password);
     if (!isValidPassword) {
       return NextResponse.json(
         { error: "Invalid credentials" },

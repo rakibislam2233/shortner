@@ -1,8 +1,7 @@
-// Fixed: MongoDB Link schema with Mongoose
-import mongoose from 'mongoose';
+import mongoose, { Model, Schema } from "mongoose";
 
 // Define the interface for the Link document
-interface ILink {
+export interface ILink {
   id: string;
   image: string;
   urlMobile: string;
@@ -12,38 +11,46 @@ interface ILink {
   updatedAt: Date;
 }
 
-// Create the schema
-const linkSchema = new mongoose.Schema<ILink>({
-  id: {
-    type: String,
-    required: true,
-    unique: true,
-    trim: true
-  },
-  image: {
-    type: String,
-    required: true
-  },
-  urlMobile: {
-    type: String,
-    required: true
-  },
-  urlDesktop: {
-    type: String,
-    required: false
-  },
-  username: {
-    type: String,
-    required: true
-  }
-}, {
-  timestamps: true // Adds createdAt and updatedAt fields automatically
-});
+// Define the interface for the Link model
+export interface ILinkModel extends Model<ILink> {}
 
-// Create indexes for better query performance
-linkSchema.index({ id: 1 });
+// Create the schema
+const linkSchema = new Schema<ILink, ILinkModel>(
+  {
+    id: {
+      type: String,
+      required: true,
+      unique: true, // This creates an index automatically
+      trim: true,
+    },
+    image: {
+      type: String,
+      required: true,
+    },
+    urlMobile: {
+      type: String,
+      required: true,
+    },
+    urlDesktop: {
+      type: String,
+      required: false,
+    },
+    username: {
+      type: String,
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+// Create indexes for better query performance (excluding id since unique: true already creates index)
 linkSchema.index({ username: 1 });
 
-// Create and export the model
-const Link = mongoose.models.Link || mongoose.model<ILink>('Link', linkSchema);
+// Create and export the model with proper typing
+const Link =
+  (mongoose.models.Link as ILinkModel) ||
+  mongoose.model<ILink, ILinkModel>("Link", linkSchema);
+
 export default Link;

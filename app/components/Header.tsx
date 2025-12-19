@@ -1,7 +1,9 @@
+// Fixed: Updated Header component with toast notifications
 "use client";
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 /**
  * A simple header component that displays the current username (if
@@ -31,17 +33,22 @@ export default function Header({ initialUsername }: { initialUsername?: string }
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/logout', { method: 'POST' });
+      const res = await fetch('/api/logout', { method: 'POST' });
+      if (res.ok) {
+        toast.success('Logged out successfully');
+        router.push('/login');
+      } else {
+        toast.error('Logout failed');
+      }
     } catch (err) {
       console.error(err);
-    } finally {
-      router.push('/login');
+      toast.error('An unexpected error occurred');
     }
   };
 
   return (
     <header
-      className="mb-8 flex items-center justify-between rounded-lg shadow-md p-4 bg-gradient-to-l from-blue-600 via-purple-600 to-pink-600 text-white animate-fade-in"
+      className="w-full container mx-auto mb-8 flex items-center justify-between rounded-lg shadow-md p-4 bg-gradient-to-l from-blue-600 via-purple-600 to-pink-600 text-white animate-fade-in"
     >
       <div className="flex flex-col lg:flex-row items-center space-x-2 text-xl md:text-2xl tracking-tight font-bold ">
         {/* App logo icon (simple link icon) */}
