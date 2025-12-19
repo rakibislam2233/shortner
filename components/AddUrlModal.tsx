@@ -1,21 +1,13 @@
-// Fixed: Updated AddUrlModal component using API calls with toast notifications
 "use client";
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { toast } from 'sonner';
+import { toast } from "sonner";
 
 interface AddUrlModalProps {
   onClose: () => void;
   onCreated: () => void;
 }
-
-/**
- * AddUrlModal
- * - Renders via a portal directly under <body> so the overlay always spans the full viewport.
- * - Locks background scroll while open.
- * - Centers the card with a full-viewport flex wrapper.
- */
 export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
   const [id, setId] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -66,16 +58,18 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
       formData.append("id", id.trim());
       formData.append("image", imageFile);
       formData.append("urlMobile", urlMobile.trim());
-      // Only append urlDesktop if it has a value
       if (urlDesktop.trim()) {
         formData.append("urlDesktop", urlDesktop.trim());
       }
 
-      const res = await fetch("/api/create", { method: "POST", body: formData });
+      const res = await fetch("/api/create", {
+        method: "POST",
+        body: formData,
+      });
       if (res.ok) {
         await res.json();
         onCreated();
-        toast.success('Link created successfully!');
+        toast.success("Link created successfully!");
 
         // Clear form
         setId("");
@@ -201,10 +195,12 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
             <div className="flex items-center justify-between pt-2">
               <button
                 type="submit"
-                className={`bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:opacity-90 text-white px-4 py-2 rounded-md shadow transition-opacity duration-200 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                className={`bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:opacity-90 text-white px-4 py-2 rounded-md shadow transition-opacity duration-200 ${
+                  loading ? "opacity-70 cursor-not-allowed" : ""
+                }`}
                 disabled={loading}
               >
-                {loading ? 'Creating...' : 'Submit'}
+                {loading ? "Creating..." : "Submit"}
               </button>
               <button
                 type="button"

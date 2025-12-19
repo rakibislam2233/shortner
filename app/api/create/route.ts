@@ -49,10 +49,16 @@ export async function POST(req: NextRequest) {
     const file = formData.get("image");
 
     // Validate using Zod
+    // Convert urlDesktop to null if it's an empty string or just whitespace
+    let urlDesktopValue = null;
+    if (typeof urlDesktop === 'string' && urlDesktop.trim() !== '') {
+      urlDesktopValue = urlDesktop.trim();
+    }
+
     const parsedData = createLinkSchema.safeParse({
       id: id as string,
       urlMobile: urlMobile as string,
-      urlDesktop: urlDesktop as string | null,
+      urlDesktop: urlDesktopValue,
       image: file as File
     });
 
