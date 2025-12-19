@@ -1,6 +1,5 @@
-// Fixed: MongoDB connection utility
-import mongoose from 'mongoose';
 
+import mongoose from 'mongoose';
 const MONGODB_URI = process.env.MONGODB_URI!;
 
 if (!MONGODB_URI) {
@@ -17,7 +16,6 @@ async function dbConnect() {
   if (cached.conn) {
     return cached.conn;
   }
-
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
@@ -27,7 +25,6 @@ async function dbConnect() {
       return mongoose;
     });
   }
-  
   try {
     cached.conn = await cached.promise;
   } catch (e) {

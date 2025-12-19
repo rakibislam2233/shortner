@@ -1,4 +1,4 @@
-// Fixed: Server actions for CRUD operations
+
 'use server'
 
 import { revalidatePath } from 'next/cache';
@@ -111,47 +111,6 @@ export async function createLink(prevState: any, formData: FormData) {
   }
 }
 
-// Delete a link
-export async function deleteLink(id: string) {
-  try {
-    // Check user authentication
-    const username = (await cookies()).get('username')?.value;
-    if (!username) {
-      return { error: "Unauthorized" };
-    }
-
-    // Connect to the database
-    await dbConnect();
-
-    // Find the link to delete
-    const link = await Link.findOne({ id, username });
-    if (!link) {
-      return { error: "Link not found or you don't have permission to delete it" };
-    }
-
-    // Remove the associated image file
-    try {
-      const imagePath = path.join(process.cwd(), "public", link.image);
-      await fs.unlink(imagePath);
-    } catch (fileError) {
-      console.warn("Could not delete image file:", fileError);
-    }
-
-    // Delete the link from the database
-    await Link.deleteOne({ id });
-
-    // Revalidate the home page to reflect the deletion
-    revalidatePath('/');
-
-    return { success: true, message: "Link deleted successfully" };
-  } catch (error) {
-    if (error instanceof Error) {
-      return { error: error.message };
-    }
-    
-    return { error: "An unexpected error occurred" };
-  }
-}
 
 // Get all links for the current user
 export async function getUserLinks() {
@@ -162,9 +121,9 @@ export async function getUserLinks() {
     }
 
     await dbConnect();
-    
-    const links = await Link.find({ username }).select('_id id image urlMobile urlDesktop createdAt').sort({ createdAt: -1 });
-    
+
+    const links = await Link.find({ username }).select('_id id image urlMobile urlDesktop createdAt').sort({ createdAt: -1 }).lean();
+
     return JSON.parse(JSON.stringify(links)); // Convert ObjectId to string for client-side usage
   } catch (error) {
     console.error("Error fetching user links:", error);

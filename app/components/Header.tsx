@@ -18,10 +18,6 @@ export default function Header({ initialUsername }: { initialUsername?: string }
   // the username state starts empty and will be filled by parsing
   // document.cookie.
   const [username, setUsername] = useState<string>(initialUsername ?? '');
-
-  // Parse the username from document.cookie on the client if it was
-  // not already provided. The cookie string looks like
-  // "username=usera; other=value".
   useEffect(() => {
     // Only parse cookies if we don't already have a username. This
     // avoids overwriting the initialUsername passed from the server.

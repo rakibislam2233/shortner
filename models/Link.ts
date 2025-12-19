@@ -2,7 +2,7 @@
 import mongoose from 'mongoose';
 
 // Define the interface for the Link document
-interface ILink extends Document {
+interface ILink {
   id: string;
   image: string;
   urlMobile: string;

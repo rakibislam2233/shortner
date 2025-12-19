@@ -1,8 +1,10 @@
-// components/AddUrlModal.tsx
+
+// Fixed: Updated AddUrlModal component using API calls with toast notifications
 "use client";
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { toast } from 'sonner';
 
 interface AddUrlModalProps {
   onClose: () => void;
@@ -20,7 +22,7 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [urlMobile, setUrlMobile] = useState("");
   const [urlDesktop, setUrlDesktop] = useState("");
-  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -47,14 +49,16 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
+    setLoading(true);
 
     if (!id.trim() || !urlMobile.trim()) {
-      setError("Custom ID and Mobile URL are required.");
+      toast.error("Custom ID and Mobile URL are required.");
+      setLoading(false);
       return;
     }
     if (!imageFile) {
-      setError("Please choose an image (GIF/PNG/JPG).");
+      toast.error("Please choose an image (GIF/PNG/JPG).");
+      setLoading(false);
       return;
     }
 
@@ -67,8 +71,9 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
 
       const res = await fetch("/api/create", { method: "POST", body: formData });
       if (res.ok) {
-        await res.json(); // if you use the response elsewhere, keep it
+        await res.json();
         onCreated();
+        toast.success('Link created successfully!');
 
         // Clear form
         setId("");
@@ -80,11 +85,13 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
         onClose();
       } else {
         const errorData = await res.json().catch(() => ({}));
-        setError(errorData.error || "Failed to create link");
+        toast.error(errorData.error || "Failed to create link");
       }
     } catch (err) {
       console.error(err);
-      setError("An unexpected error occurred.");
+      toast.error("An unexpected error occurred.");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -110,6 +117,7 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
               onClick={onClose}
               className="text-white/90 hover:text-white transition"
               aria-label="Close modal"
+              disabled={loading}
             >
               ✕
             </button>
@@ -122,7 +130,7 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
                 htmlFor="id"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Image Name
+                Image Name (3-20 chars, letters/numbers/hyphens only)
               </label>
               <input
                 type="text"
@@ -131,12 +139,13 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
                 onChange={(e) => setId(e.target.value)}
                 placeholder="Enter custom ID"
                 className="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                disabled={loading}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Upload Image
+                Upload Image (max 5MB: jpeg, png, gif)
               </label>
               <input
                 type="file"
@@ -147,6 +156,7 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
                 }}
                 ref={fileInputRef}
                 className="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                disabled={loading}
               />
             </div>
 
@@ -164,6 +174,7 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
                 onChange={(e) => setUrlMobile(e.target.value)}
                 placeholder="https://example.com/mobile"
                 className="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                disabled={loading}
               />
             </div>
 
@@ -181,22 +192,23 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
                 onChange={(e) => setUrlDesktop(e.target.value)}
                 placeholder="https://example.com/desktop"
                 className="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                disabled={loading}
               />
             </div>
-
-            {error && <div className="text-red-600 text-sm">{error}</div>}
 
             <div className="flex items-center justify-between pt-2">
               <button
                 type="submit"
-                className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:opacity-90 text-white px-4 py-2 rounded-md shadow transition-opacity duration-200"
+                className={`bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:opacity-90 text-white px-4 py-2 rounded-md shadow transition-opacity duration-200 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                disabled={loading}
               >
-                Submit
+                {loading ? 'Creating...' : 'Submit'}
               </button>
               <button
                 type="button"
                 onClick={onClose}
-                className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md"
+                className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md disabled:opacity-50"
+                disabled={loading}
               >
                 Close
               </button>

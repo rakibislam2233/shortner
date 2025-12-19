@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from 'react';
-import AddUrlModal from './AddUrlModal';
+import { useState } from "react";
+import AddUrlModal from "./AddUrlModal";
 
 interface AddUrlButtonProps {
   onCreated: () => void;
@@ -27,9 +27,7 @@ export default function AddUrlButton({ onCreated }: AddUrlButtonProps) {
         <AddUrlModal
           onClose={() => setOpen(false)}
           onCreated={() => {
-            // refresh the list when a new entry is created
             onCreated();
-            // The modal will call onClose internally, which triggers setOpen(false).
           }}
         />
       )}

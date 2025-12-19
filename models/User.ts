@@ -1,7 +1,7 @@
 // Fixed: MongoDB User schema with Mongoose
 import mongoose from 'mongoose';
 
-interface IUser extends Document {
+interface IUser {
   username: string;
   password: string; // This will be hashed
   createdAt: Date;
