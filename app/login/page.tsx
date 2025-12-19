@@ -1,22 +1,11 @@
-// Fixed: Updated login page with toast notifications
 "use client";
-
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import Header from '../components/Header';
-import { toast } from 'sonner';
-
-/**
- * Login page component. Prompts the user for a username and
- * password and calls the `/api/login` endpoint on submit. On
- * successful login the user is redirected to the home page. An
- * optional link is provided to the registration page for new
- * users.
- */
+import Header from "@/components/Header";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 export default function LoginPage() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -25,27 +14,30 @@ export default function LoginPage() {
     setLoading(true);
 
     if (!username.trim() || !password) {
-      toast.error('Please provide both a username and a password.');
+      toast.error("Please provide both a username and a password.");
       setLoading(false);
       return;
     }
 
     try {
-      const res = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: username.trim().toLowerCase(), password })
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: username.trim().toLowerCase(),
+          password,
+        }),
       });
       if (res.ok) {
-        toast.success('Login successful!');
-        router.push('/');
+        toast.success("Login successful!");
+        router.push("/");
       } else {
         const data = await res.json();
-        toast.error(data.error || 'Login failed');
+        toast.error(data.error || "Login failed");
       }
     } catch (err) {
       console.error(err);
-      toast.error('An unexpected error occurred');
+      toast.error("An unexpected error occurred");
     } finally {
       setLoading(false);
     }
@@ -53,15 +45,17 @@ export default function LoginPage() {
 
   return (
     <>
-      {/* Display a minimal header on the login page. Since the user is
-          unauthenticated here, the header will only show the app title
-          and will not render the logout button. */}
       <Header />
       <div className="max-w-md mx-auto mt-16 p-6 rounded-lg shadow-xl bg-white/90 backdrop-blur-md animate-fade-in">
-        <h1 className="text-2xl font-bold mb-6 text-gray-800 text-center">Login</h1>
+        <h1 className="text-2xl font-bold mb-6 text-gray-800 text-center">
+          Login
+        </h1>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="username"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Username
             </label>
             <input
@@ -74,7 +68,10 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Password
             </label>
             <input
@@ -88,10 +85,12 @@ export default function LoginPage() {
           </div>
           <button
             type="submit"
-            className={`w-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:opacity-90 text-white font-medium px-4 py-2 rounded-md shadow transition-opacity duration-200 ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+            className={`w-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:opacity-90 text-white font-medium px-4 py-2 rounded-md shadow transition-opacity duration-200 ${
+              loading ? "opacity-70 cursor-not-allowed" : ""
+            }`}
             disabled={loading}
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
         {/* <p className="mt-6 text-sm text-center text-gray-600">

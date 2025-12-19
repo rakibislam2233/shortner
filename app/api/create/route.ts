@@ -42,10 +42,7 @@ export async function POST(req: NextRequest) {
     if (!username) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
     const formData = await req.formData();
-
-    // Extract fields from formData
     const id = formData.get("id");
     const urlMobile = formData.get("urlMobile");
     const urlDesktop = formData.get("urlDesktop");

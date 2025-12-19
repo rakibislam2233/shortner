@@ -1,20 +1,12 @@
 "use client";
-
 import { useState } from "react";
 import AddUrlModal from "./AddUrlModal";
 
 interface AddUrlButtonProps {
   onCreated: () => void;
 }
-
-/**
- * Renders a button that opens the AddUrlModal. The parent passes
- * an onCreated callback which will be triggered after a successful
- * creation to refresh the list of links.
- */
 export default function AddUrlButton({ onCreated }: AddUrlButtonProps) {
   const [open, setOpen] = useState(false);
-
   return (
     <>
       <button

@@ -55,11 +55,10 @@ function isRateLimited(
 }
 
 // Create a new short link
-export async function createLink(prevState: any, formData: FormData) {
+export async function createLink(formData: FormData) {
   try {
     // Get IP address for rate limiting
     const ip = (global as any).ipAddress || "unknown";
-
     if (isRateLimited(ip)) {
       return { error: "Too many requests. Please try again later." };
     }
@@ -79,16 +78,13 @@ export async function createLink(prevState: any, formData: FormData) {
     };
 
     const validatedData = createLinkSchema.parse(rawFormData);
-
     // Connect to the database
     await dbConnect();
-
     // Check if the ID already exists - FIXED
     const existingLink = await Link.findOne({ id: validatedData.id }).exec();
     if (existingLink) {
       return { error: "ID already exists" };
     }
-
     // Prepare file upload
     const fileExtension = path.extname(validatedData.image.name).toLowerCase();
     const newFilename = `${uuidv4()}${fileExtension}`;

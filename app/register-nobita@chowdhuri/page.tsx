@@ -1,16 +1,8 @@
 "use client";
-
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Header from '../components/Header';
-
-/**
- * Registration page component. Collects a username and password
- * from the user and posts them to the `/api/register` endpoint.
- * On successful registration the user is logged in automatically
- * and redirected to the home page.
- */
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import Header from '../../components/Header';
 export default function RegisterPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');

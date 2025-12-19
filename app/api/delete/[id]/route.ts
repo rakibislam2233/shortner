@@ -1,4 +1,4 @@
-// Fixed: API route for deleting links using server actions
+
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
@@ -13,7 +13,6 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-
     // Check user authentication
     const username = (await cookies()).get('username')?.value;
     if (!username) {
@@ -31,21 +30,14 @@ export async function DELETE(
         { status: 404 }
       );
     }
-
-    // Remove the associated image file
     try {
       const imagePath = path.join(process.cwd(), "public", link.image);
       await fs.unlink(imagePath);
     } catch (fileError) {
       console.warn("Could not delete image file:", fileError);
     }
-
-    // Delete the link from the database
     await Link.deleteOne({ id });
-
-    // Revalidate the home page to reflect the deletion
     revalidatePath('/');
-
     return NextResponse.json({ success: true, message: "Link deleted successfully" });
   } catch (error) {
     console.error("Delete error:", error);

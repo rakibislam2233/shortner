@@ -3,13 +3,6 @@ import path from "path";
 import fs from "fs/promises";
 
 type RouteParams = Promise<{ id: string }>;
-
-/**
- * GET handler to retrieve a stored link mapping by id.
- *
- * Responds with the associated image path and destination URLs
- * if the id exists, or a 404 Not Found otherwise.
- */
 export async function GET(
   _req: NextRequest,
   { params }: { params: RouteParams }

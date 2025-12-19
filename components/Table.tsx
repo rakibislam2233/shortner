@@ -1,4 +1,3 @@
-// Fixed: Updated Table component using API calls for delete with toast notifications
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -18,20 +17,10 @@ interface LinkEntry {
 interface TableProps {
   initialLinks: LinkEntry[];
 }
-
-/**
- * Client component that displays a list of existing shortened URLs in a
- * table. It also renders an AddUrlButton to open the modal for
- * creating new entries. When a new entry is created the table is
- * refreshed by fetching the data from the API again.
- */
 export default function Table({ initialLinks }: TableProps) {
   const [links, setLinks] = useState<LinkEntry[]>(initialLinks);
   const [search, setSearch] = useState('');
 
-  // Save the current origin so we can construct full short URLs. This is
-  // initialised on mount only on the client side since `window` is not
-  // available during SSR.
   const [origin, setOrigin] = useState('');
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -39,9 +28,7 @@ export default function Table({ initialLinks }: TableProps) {
     }
   }, []);
 
-  // Handler passed down to AddUrlButton; when called, it refreshes the list
   const handleCreated = async () => {
-    // Re-fetch links after a new one is created
     const updatedLinks = await getUserLinks();
     setLinks(updatedLinks as LinkEntry[]);
   };

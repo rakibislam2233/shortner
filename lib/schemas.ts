@@ -1,14 +1,13 @@
 // Fixed: Zod validation schemas
 import { z } from 'zod';
 
-// Schema for validating the link creation form
 export const createLinkSchema = z.object({
   id: z.string()
     .min(3, 'Custom ID must be at least 3 characters')
     .max(20, 'Custom ID must be at most 20 characters')
     .regex(/^[a-zA-Z0-9-]+$/, 'Custom ID can only contain letters, numbers, and hyphens'),
   urlMobile: z.string().url('Mobile URL must be a valid URL'),
-  urlDesktop: z.string().url('Desktop URL must be a valid URL').optional().nullable(),
+  urlDesktop: z.string().optional(),
   image: z.instanceof(File)
     .refine(file => file.size <= 5 * 1024 * 1024, 'File size must be less than 5MB')
     .refine(

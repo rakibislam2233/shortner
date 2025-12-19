@@ -15,9 +15,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body className="mx-auto max-w-6xl p-4 md:p-8">
         {children}
-        <Toaster position="top-right" />
+        <Toaster position="top-center" richColors />
       </body>
     </html>
   );

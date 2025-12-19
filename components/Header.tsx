@@ -48,7 +48,7 @@ export default function Header({ initialUsername }: { initialUsername?: string }
 
   return (
     <header
-      className="w-full container mx-auto mb-8 flex items-center justify-between rounded-lg shadow-md p-4 bg-gradient-to-l from-blue-600 via-purple-600 to-pink-600 text-white animate-fade-in"
+      className="w-full mb-8 flex items-center justify-between rounded-lg shadow-md p-4 bg-gradient-to-l from-blue-600 via-purple-600 to-pink-600 text-white animate-fade-in"
     >
       <div className="flex flex-col lg:flex-row items-center space-x-2 text-xl md:text-2xl tracking-tight font-bold ">
         {/* App logo icon (simple link icon) */}

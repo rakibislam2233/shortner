@@ -1,4 +1,3 @@
-
 // Fixed: Updated AddUrlModal component using API calls with toast notifications
 "use client";
 
@@ -67,7 +66,10 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
       formData.append("id", id.trim());
       formData.append("image", imageFile);
       formData.append("urlMobile", urlMobile.trim());
-      formData.append("urlDesktop", urlDesktop.trim());
+      // Only append urlDesktop if it has a value
+      if (urlDesktop.trim()) {
+        formData.append("urlDesktop", urlDesktop.trim());
+      }
 
       const res = await fetch("/api/create", { method: "POST", body: formData });
       if (res.ok) {

@@ -1,6 +1,5 @@
 import mongoose, { Model, Schema } from "mongoose";
 
-// Define the interface for the Link document
 export interface ILink {
   id: string;
   image: string;
@@ -20,7 +19,7 @@ const linkSchema = new Schema<ILink, ILinkModel>(
     id: {
       type: String,
       required: true,
-      unique: true, // This creates an index automatically
+      unique: true, 
       trim: true,
     },
     image: {
@@ -32,8 +31,7 @@ const linkSchema = new Schema<ILink, ILinkModel>(
       required: true,
     },
     urlDesktop: {
-      type: String,
-      required: false,
+      type: String
     },
     username: {
       type: String,

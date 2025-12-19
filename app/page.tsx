@@ -1,11 +1,11 @@
 // Fixed: Updated home page with database validation
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import Table from "./components/Table";
-import Header from "./components/Header";
 import { getUserLinks } from '@/lib/actions';
 import dbConnect from '@/lib/db';
 import User from '@/models/User';
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import Header from "../components/Header";
+import Table from "../components/Table";
 
 export default async function HomePage() {
   const username = (await cookies()).get('username')?.value;
