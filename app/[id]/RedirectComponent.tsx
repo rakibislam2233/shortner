@@ -1,5 +1,4 @@
 "use client";
-
 import Image from "next/image";
 import { useEffect } from "react";
 
@@ -9,11 +8,6 @@ interface Props {
   urlDesktop?: string;
 }
 
-/**
- * Client component that shows a loading image and redirects the visitor
- * after a short delay. The destination is determined by inspecting the
- * browser's user agent to differentiate between mobile and desktop devices.
- */
 export default function RedirectComponent({ image, urlMobile, urlDesktop }: Props) {
   useEffect(() => {
     // Basic mobile detection using user agent strings. You may refine this as needed.
@@ -40,7 +34,7 @@ export default function RedirectComponent({ image, urlMobile, urlDesktop }: Prop
     if (validatedTarget) {
       const timer = setTimeout(() => {
         window.location.href = validatedTarget!;
-      }, 2000); // redirect after 2 seconds
+      }, 1000); 
       return () => clearTimeout(timer);
     }
   }, [urlMobile, urlDesktop]);
