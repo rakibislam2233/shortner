@@ -1,19 +1,11 @@
 import dbConnect from "@/lib/db";
 import LinkModel from "@/models/Link";
-import { notFound } from "next/navigation";
-import RedirectComponent from "./RedirectComponent";
+import { notFound, redirect } from "next/navigation";
+import { headers } from "next/headers";
 
-// Force runtime rendering and disable static regeneration
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-/**
- * Server component that resolves the provided id to a stored link entry.
- *
- * If the id exists in the data store, it renders a client component that
- * displays the loading image and performs a timed redirect. Otherwise it
- * triggers the notFound() helper to render the 404 page.
- */
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
@@ -27,11 +19,24 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     return notFound();
   }
 
-  return (
-    <RedirectComponent
-      image={entry.image}
-      urlMobile={entry.urlMobile}
-      urlDesktop={entry.urlDesktop}
-    />
-  );
+  // Get headers to detect user agent
+  const requestHeaders = headers();
+  const userAgent = (await requestHeaders).get('user-agent') || '';
+
+  // Determine target URL based on device type
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+  const targetUrl = isMobile ? entry.urlMobile : entry.urlDesktop || entry.urlMobile;
+
+  // Validate the target URL to prevent open redirect vulnerabilities
+  try {
+    const url = new URL(targetUrl);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+      return notFound();
+    }
+  } catch {
+    return notFound();
+  }
+
+  // Perform immediate server-side redirect
+  redirect(targetUrl);
 }
