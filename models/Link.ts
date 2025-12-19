@@ -45,7 +45,7 @@ const linkSchema = new Schema<ILink, ILinkModel>(
 
 // Create indexes for better query performance
 linkSchema.index({ username: 1 });
-linkSchema.index({ imageName: 1 }); 
+// Note: imageName already has unique: true which creates an index automatically
 
 // Create and export the model with proper typing
 const Link =
