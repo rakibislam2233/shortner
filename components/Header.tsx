@@ -1,28 +1,12 @@
-// Fixed: Updated Header component with toast notifications
 "use client";
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-
-/**
- * A simple header component that displays the current username (if
- * available) and provides a logout button. When the logout button is
- * clicked the component calls the `/api/logout` endpoint and then
- * redirects the user to the login page.
- */
 export default function Header({ initialUsername }: { initialUsername?: string }) {
   const router = useRouter();
-  // Initialise the username from a prop if provided. This allows
-  // server components (like the home page) to pass the username
-  // directly, avoiding a flash of unauthenticated state before
-  // client-side cookie parsing completes. If no prop is provided
-  // the username state starts empty and will be filled by parsing
-  // document.cookie.
   const [username, setUsername] = useState<string>(initialUsername ?? '');
   useEffect(() => {
-    // Only parse cookies if we don't already have a username. This
-    // avoids overwriting the initialUsername passed from the server.
     if (!username && typeof document !== 'undefined') {
       const match = document.cookie.match(/(?:^|;\s*)username=([^;]+)/);
       if (match) {

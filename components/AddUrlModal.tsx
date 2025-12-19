@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
@@ -17,9 +16,7 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
   const [mounted, setMounted] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-
   useEffect(() => {
-    // Mount flag for portal (avoids SSR mismatch)
     setMounted(true);
 
     // Lock background scroll
@@ -91,7 +88,6 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
     }
   }
 
-  // The actual modal UI
   const modal = (
     // Full-screen overlay (no padding here)
     <div

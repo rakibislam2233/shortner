@@ -2,7 +2,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  // Clone the response to modify headers
   const response = NextResponse.next();
 
   // Strict Transport Security
