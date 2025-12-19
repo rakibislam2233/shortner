@@ -1,4 +1,4 @@
-// Fixed: Security headers middleware
+// Security headers middleware
 import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(request: NextRequest) {
@@ -62,10 +62,6 @@ export const config = {
      */
     {
       source: '/((?!api|_next/static|_next/image|favicon.ico).*)',
-      missing: [
-        { type: 'header', key: 'next-router-prefetch' },
-        { type: 'header', key: 'purpose', value: 'prefetch' }
-      ]
     }
   ]
 };
