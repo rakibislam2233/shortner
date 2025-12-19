@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import AddUrlButton from "./AddUrlButton";
 import { getUserLinks } from "@/lib/actions";
 import { toast } from "sonner";
@@ -18,14 +19,22 @@ interface LinkEntry {
 interface TableProps {
   initialLinks: LinkEntry[];
 }
+
 export default function Table({ initialLinks }: TableProps) {
   const [links, setLinks] = useState<LinkEntry[]>(initialLinks);
   const [search, setSearch] = useState("");
-
   const [origin, setOrigin] = useState("");
+
+  // Delete modal states
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [linkToDelete, setLinkToDelete] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       setOrigin(window.location.origin);
+      setMounted(true);
     }
   }, []);
 
@@ -39,26 +48,132 @@ export default function Table({ initialLinks }: TableProps) {
     link?.imageName?.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleDelete = async (imageName: string) => {
-    if (!confirm(`Delete entry ${imageName}?`)) return;
+  // Open delete modal
+  const openDeleteModal = (imageName: string) => {
+    setLinkToDelete(imageName);
+    setDeleteModalOpen(true);
+  };
 
+  // Close delete modal
+  const closeDeleteModal = () => {
+    if (deleting) return;
+    setDeleteModalOpen(false);
+    setLinkToDelete(null);
+  };
+
+  // Confirm deletion
+  const confirmDelete = async () => {
+    if (!linkToDelete || deleting) return;
+
+    setDeleting(true);
     try {
-      const res = await fetch(`/api/delete/${imageName}`, { method: "DELETE" });
+      const res = await fetch(`/api/delete/${linkToDelete}`, {
+        method: "DELETE",
+      });
       if (res.ok) {
-        // Optimistically update local state
-        setLinks((prev) => prev.filter((item) => item.imageName !== imageName));
-        // Then re-fetch to ensure consistency
+        setLinks((prev) =>
+          prev.filter((item) => item.imageName !== linkToDelete)
+        );
         await handleCreated();
         toast.success("Link deleted successfully");
+        closeDeleteModal();
       } else {
         const errorData = await res.json();
-        console.error("Failed to delete:", errorData.error);
         toast.error(errorData.error || "Failed to delete link");
       }
     } catch (err) {
       console.error(err);
       toast.error("An unexpected error occurred while deleting");
+    } finally {
+      setDeleting(false);
     }
+  };
+
+  // Delete Confirmation Modal Component (styled like AddUrlModal)
+  const DeleteModal = () => {
+    useEffect(() => {
+      // Lock scroll
+      document.body.style.overflow = "hidden";
+
+      const handleEsc = (e: KeyboardEvent) => {
+        if (e.key === "Escape") closeDeleteModal();
+      };
+      document.addEventListener("keydown", handleEsc);
+
+      return () => {
+        document.body.style.overflow = "";
+        document.removeEventListener("keydown", handleEsc);
+      };
+    }, []);
+
+    if (!deleteModalOpen || !mounted) return null;
+
+    const modalContent = (
+      <div
+        className="fixed inset-0 z-[9999] bg-black/50"
+        role="dialog"
+        aria-modal="true"
+        onClick={closeDeleteModal}
+      >
+        <div
+          className="flex lg:h-screen w-screen items-center justify-center p-4"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="bg-white rounded-lg shadow-2xl w-full max-w-md animate-fade-in mt-20 lg:mt-0">
+            {/* Gradient Header */}
+            <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 px-6 py-4 flex justify-between items-center rounded-t-lg">
+              <h2 className="text-lg font-semibold text-white">
+                Confirm Delete
+              </h2>
+              <button
+                onClick={closeDeleteModal}
+                className="text-white/90 hover:text-white transition"
+                aria-label="Close modal"
+                disabled={deleting}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="px-6 py-8 text-center space-y-4">
+              <p className="text-gray-700">
+                Are you sure you want to delete the entry
+              </p>
+              <p className="text-lg font-semibold text-red-600">
+                "{linkToDelete}"
+              </p>
+              <p className="text-sm text-gray-500">
+                This action cannot be undone.
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center justify-between px-6 pb-6 pt-2">
+              <button
+                type="button"
+                onClick={closeDeleteModal}
+                className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-md transition disabled:opacity-50"
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDelete}
+                className={`bg-gradient-to-r from-red-600 to-pink-600 hover:opacity-90 text-white px-6 py-2 rounded-md shadow transition-opacity duration-200 ${
+                  deleting ? "opacity-70 cursor-not-allowed" : ""
+                }`}
+                disabled={deleting}
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+
+    return createPortal(modalContent, document.body);
   };
 
   return (
@@ -66,11 +181,12 @@ export default function Table({ initialLinks }: TableProps) {
       <div className="bg-white/80 backdrop-blur-md p-6 rounded-lg shadow-2xl border border-gray-200">
         {/* Header with Add URL button */}
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold tracking-tighter  text-gray-800 border-l-4 border-blue-600 pl-3">
+          <h1 className="text-2xl font-bold tracking-tighter text-gray-800 border-l-4 border-blue-600 pl-3">
             Your Links
           </h1>
           <AddUrlButton onCreated={handleCreated} />
         </div>
+
         {/* Search input */}
         <div className="flex justify-end mb-4">
           <input
@@ -81,6 +197,7 @@ export default function Table({ initialLinks }: TableProps) {
             className="border border-gray-300 rounded px-3 py-2 w-full max-w-xs focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white shadow-sm"
           />
         </div>
+
         {/* Table */}
         <div className="overflow-x-auto rounded-lg shadow-lg">
           <table className="min-w-full divide-y divide-gray-200">
@@ -147,7 +264,6 @@ export default function Table({ initialLinks }: TableProps) {
                       {link?.imageName}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-blue-700">
-                      {/* The mobile URL may be long; wrap in an anchor for convenience */}
                       <a
                         href={link.urlMobile}
                         className="underline"
@@ -178,13 +294,14 @@ export default function Table({ initialLinks }: TableProps) {
                         target="_blank"
                         rel="noreferrer"
                       >
-                        {origin ? `${origin}/${link.imageName}` : `/${link.imageName}`}
+                        {origin
+                          ? `${origin}/${link.imageName}`
+                          : `/${link.imageName}`}
                       </Link>
                     </td>
-                    {/* Actions column */}
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-red-600">
                       <button
-                        onClick={() => handleDelete(link.imageName)}
+                        onClick={() => openDeleteModal(link.imageName)}
                         className="underline hover:text-red-700 transition-colors duration-200"
                       >
                         Delete
@@ -197,6 +314,7 @@ export default function Table({ initialLinks }: TableProps) {
           </table>
         </div>
       </div>
+      <DeleteModal />
     </div>
   );
 }

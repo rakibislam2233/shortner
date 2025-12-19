@@ -5,14 +5,6 @@ import RedirectComponent from "./RedirectComponent";
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
-
-/**
- * Server component that resolves the provided id (imageName) to a stored link entry.
- *
- * If the imageName exists in the data store, it renders a client component that
- * displays the loading image and performs a timed redirect. Otherwise it
- * triggers the notFound() helper to render the 404 page.
- */
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
