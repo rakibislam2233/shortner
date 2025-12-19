@@ -6,28 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 import dbConnect from "@/lib/db";
 import Link from "@/models/Link";
 import { createLinkSchema } from "@/lib/schemas";
-
-// In-memory rate limiting (simple implementation)
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-
-// Rate limiter function
-function isRateLimited(ip: string, limit: number = 10, windowMs: number = 60000): boolean {
-  const now = Date.now();
-  const record = rateLimitMap.get(ip) || { count: 0, resetTime: now + windowMs };
-
-  if (now > record.resetTime) {
-    // Reset the counter
-    rateLimitMap.set(ip, { count: 1, resetTime: now + windowMs });
-    return false;
-  } else {
-    // Increment the counter
-    if (record.count >= limit) {
-      return true; // Rate limited
-    }
-    rateLimitMap.set(ip, { count: record.count + 1, resetTime: record.resetTime });
-    return false;
-  }
-}
+import { isRateLimited } from "@/lib/rateLimit";
 
 export async function POST(req: NextRequest) {
   try {

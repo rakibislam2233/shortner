@@ -2,12 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/*
-  Apply a neutral background and base typography for the entire app. The
-  html, body and root elements are set to full height to allow for
-  flex layouts that fill the viewport. You can tweak these values to
-  better match your desired look and feel.
-*/
 html, body, :root {
   height: 100%;
 }

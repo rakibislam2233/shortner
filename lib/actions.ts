@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from "uuid";
 import dbConnect from "@/lib/db";
 import Link from "@/models/Link";
 import { createLinkSchema } from "@/lib/schemas";
+import { isRateLimited } from "@/lib/rateLimit";
 import type { Document } from "mongoose";
 
 // Define the return type for links
@@ -22,47 +23,9 @@ interface ILinkDocument extends Document {
   updatedAt: Date;
 }
 
-// Rate limiting in-memory store
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
-
-// Helper function for rate limiting
-function isRateLimited(
-  ip: string,
-  limit: number = 10,
-  windowMs: number = 60000
-): boolean {
-  const now = Date.now();
-  const record = rateLimitMap.get(ip) || {
-    count: 0,
-    resetTime: now + windowMs,
-  };
-
-  if (now > record.resetTime) {
-    // Reset the counter
-    rateLimitMap.set(ip, { count: 1, resetTime: now + windowMs });
-    return false;
-  } else {
-    // Increment the counter
-    if (record.count >= limit) {
-      return true; // Rate limited
-    }
-    rateLimitMap.set(ip, {
-      count: record.count + 1,
-      resetTime: record.resetTime,
-    });
-    return false;
-  }
-}
-
 // Create a new short link
 export async function createLink(formData: FormData) {
   try {
-    // Get IP address for rate limiting
-    const ip = (global as any).ipAddress || "unknown";
-    if (isRateLimited(ip)) {
-      return { error: "Too many requests. Please try again later." };
-    }
-
     // Check user authentication
     const username = (await cookies()).get("username")?.value;
     if (!username) {
@@ -176,13 +139,23 @@ export async function deleteLink(linkId: string) {
       return { error: "Link not found or unauthorized" };
     }
 
-    // Delete the associated image file
+    // Delete the associated image file with security validation
     if (deletedLink.image) {
-      const imagePath = path.join(process.cwd(), "public", deletedLink.image);
+      // Security: Validate the image path to prevent directory traversal attacks
+      const normalizedImagePath = path.normalize(deletedLink.image);
+      if (normalizedImagePath.includes('..') || normalizedImagePath.startsWith('..')) {
+        console.error("Invalid image path detected:", deletedLink.image);
+        // Still return success to not expose information about file structure
+        revalidatePath("/");
+        return { success: true, message: "Link deleted successfully" };
+      }
+
+      const imagePath = path.join(process.cwd(), "public", normalizedImagePath);
       try {
         await fs.unlink(imagePath);
       } catch (err) {
         console.error("Error deleting image file:", err);
+        // Continue with success even if file deletion fails to maintain consistency
       }
     }
 
