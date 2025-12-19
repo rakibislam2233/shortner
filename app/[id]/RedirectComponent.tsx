@@ -42,7 +42,7 @@ export default function RedirectComponent({ image, urlMobile, urlDesktop }: Prop
   return (
     <div className="flex flex-col items-center justify-center min-h-screen lg:p-8 space-y-4">
       <Image
-        src={image}
+        src={image.startsWith('/') ? image : `/${image}`}
         alt="Loading"
         width={800}
         height={600}
