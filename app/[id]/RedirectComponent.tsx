@@ -1,5 +1,4 @@
 "use client";
-import Image from "next/image";
 import { useEffect } from "react";
 
 interface Props {
@@ -41,8 +40,8 @@ export default function RedirectComponent({ image, urlMobile, urlDesktop }: Prop
   
   return (
     <div className="flex flex-col items-center justify-center min-h-screen lg:p-8 space-y-4">
-      <Image
-        src={image.startsWith('/') ? image : `/${image}`}
+      <img
+        src={image}
         alt="Loading"
         width={800}
         height={600}
