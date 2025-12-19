@@ -1,7 +1,7 @@
 import mongoose, { Model, Schema } from "mongoose";
 
 export interface ILink {
-  id: string;
+  imageName: string;
   image: string;
   urlMobile: string;
   urlDesktop?: string;
@@ -16,10 +16,10 @@ export interface ILinkModel extends Model<ILink> {}
 // Create the schema
 const linkSchema = new Schema<ILink, ILinkModel>(
   {
-    id: {
+    imageName: {
       type: String,
       required: true,
-      unique: true, 
+      unique: true,
       trim: true,
     },
     image: {
@@ -31,7 +31,7 @@ const linkSchema = new Schema<ILink, ILinkModel>(
       required: true,
     },
     urlDesktop: {
-      type: String
+      type: String,
     },
     username: {
       type: String,

@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import AddUrlButton from './AddUrlButton';
-import { getUserLinks } from '@/lib/actions';
-import { toast } from 'sonner';
+import { useEffect, useState } from "react";
+import AddUrlButton from "./AddUrlButton";
+import { getUserLinks } from "@/lib/actions";
+import { toast } from "sonner";
+import Link from "next/link";
 
 interface LinkEntry {
   _id: string;
-  id: string;
+  imageName: string;
   image: string;
   urlMobile: string;
   urlDesktop?: string;
@@ -19,11 +20,11 @@ interface TableProps {
 }
 export default function Table({ initialLinks }: TableProps) {
   const [links, setLinks] = useState<LinkEntry[]>(initialLinks);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
 
-  const [origin, setOrigin] = useState('');
+  const [origin, setOrigin] = useState("");
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       setOrigin(window.location.origin);
     }
   }, []);
@@ -35,28 +36,28 @@ export default function Table({ initialLinks }: TableProps) {
 
   // Filter the list based on the search term
   const filtered = links.filter((link) =>
-    link.id.toLowerCase().includes(search.toLowerCase())
+    link?.imageName?.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleDelete = async (id: string) => {
-    if (!confirm(`Delete entry ${id}?`)) return;
+  const handleDelete = async (imageName: string) => {
+    if (!confirm(`Delete entry ${imageName}?`)) return;
 
     try {
-      const res = await fetch(`/api/delete/${id}`, { method: 'DELETE' });
+      const res = await fetch(`/api/delete/${imageName}`, { method: "DELETE" });
       if (res.ok) {
         // Optimistically update local state
-        setLinks((prev) => prev.filter((item) => item.id !== id));
+        setLinks((prev) => prev.filter((item) => item.imageName !== imageName));
         // Then re-fetch to ensure consistency
         await handleCreated();
-        toast.success('Link deleted successfully');
+        toast.success("Link deleted successfully");
       } else {
         const errorData = await res.json();
-        console.error('Failed to delete:', errorData.error);
-        toast.error(errorData.error || 'Failed to delete link');
+        console.error("Failed to delete:", errorData.error);
+        toast.error(errorData.error || "Failed to delete link");
       }
     } catch (err) {
       console.error(err);
-      toast.error('An unexpected error occurred while deleting');
+      toast.error("An unexpected error occurred while deleting");
     }
   };
 
@@ -65,7 +66,9 @@ export default function Table({ initialLinks }: TableProps) {
       <div className="bg-white/80 backdrop-blur-md p-6 rounded-lg shadow-2xl border border-gray-200">
         {/* Header with Add URL button */}
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold tracking-tighter  text-gray-800 border-l-4 border-blue-600 pl-3">Your Links</h1>
+          <h1 className="text-2xl font-bold tracking-tighter  text-gray-800 border-l-4 border-blue-600 pl-3">
+            Your Links
+          </h1>
           <AddUrlButton onCreated={handleCreated} />
         </div>
         {/* Search input */}
@@ -83,35 +86,85 @@ export default function Table({ initialLinks }: TableProps) {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white">
               <tr>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">#</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Image Name</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Mobile Url</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Desktop Url</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Short Url</th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider">Actions</th>
+                <th
+                  scope="col"
+                  className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
+                >
+                  #
+                </th>
+                <th
+                  scope="col"
+                  className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
+                >
+                  Image Name
+                </th>
+                <th
+                  scope="col"
+                  className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
+                >
+                  Mobile Url
+                </th>
+                <th
+                  scope="col"
+                  className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
+                >
+                  Desktop Url
+                </th>
+                <th
+                  scope="col"
+                  className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
+                >
+                  Short Url
+                </th>
+                <th
+                  scope="col"
+                  className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
+                >
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-4 text-center text-gray-500">
+                  <td
+                    colSpan={6}
+                    className="px-4 py-4 text-center text-gray-500"
+                  >
                     No entries found.
                   </td>
                 </tr>
               ) : (
                 filtered.map((link, idx) => (
-                  <tr key={link.id} className="hover:bg-gray-50 odd:bg-gray-50 even:bg-white transition-colors">
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">{idx + 1}</td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{link.id}</td>
+                  <tr
+                    key={link._id}
+                    className="hover:bg-gray-50 odd:bg-gray-50 even:bg-white transition-colors"
+                  >
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                      {idx + 1}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {link?.imageName}
+                    </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-blue-700">
                       {/* The mobile URL may be long; wrap in an anchor for convenience */}
-                      <a href={link.urlMobile} className="underline" target="_blank" rel="noreferrer">
+                      <a
+                        href={link.urlMobile}
+                        className="underline"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
                         {link.urlMobile}
                       </a>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-blue-700">
                       {link.urlDesktop ? (
-                        <a href={link.urlDesktop} className="underline" target="_blank" rel="noreferrer">
+                        <a
+                          href={link.urlDesktop}
+                          className="underline"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
                           {link.urlDesktop}
                         </a>
                       ) : (
@@ -119,19 +172,19 @@ export default function Table({ initialLinks }: TableProps) {
                       )}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-blue-700">
-                      <a
-                        href={`/${link.id}`}
+                      <Link
+                        href={`/${link.imageName}`}
                         className="underline"
                         target="_blank"
                         rel="noreferrer"
                       >
-                        {origin ? `${origin}/${link.id}` : `/${link.id}`}
-                      </a>
+                        {origin ? `${origin}/${link.imageName}` : `/${link.imageName}`}
+                      </Link>
                     </td>
                     {/* Actions column */}
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-red-600">
                       <button
-                        onClick={() => handleDelete(link.id)}
+                        onClick={() => handleDelete(link.imageName)}
                         className="underline hover:text-red-700 transition-colors duration-200"
                       >
                         Delete

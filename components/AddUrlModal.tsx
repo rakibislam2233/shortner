@@ -8,7 +8,7 @@ interface AddUrlModalProps {
   onCreated: () => void;
 }
 export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
-  const [id, setId] = useState("");
+  const [imageName, setImageName] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [urlMobile, setUrlMobile] = useState("");
   const [urlDesktop, setUrlDesktop] = useState("");
@@ -37,10 +37,11 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
     setLoading(true);
 
-    if (!id.trim() || !urlMobile.trim()) {
-      toast.error("Custom ID and Mobile URL are required.");
+    if (!imageName.trim() || !urlMobile.trim()) {
+      toast.error("Image Name and Mobile URL are required.");
       setLoading(false);
       return;
     }
@@ -52,7 +53,7 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
 
     try {
       const formData = new FormData();
-      formData.append("id", id.trim());
+      formData.append("imageName", imageName.trim());
       formData.append("image", imageFile);
       formData.append("urlMobile", urlMobile.trim());
       if (urlDesktop.trim()) {
@@ -69,7 +70,7 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
         toast.success("Link created successfully!");
 
         // Clear form
-        setId("");
+        setImageName("");
         setImageFile(null);
         setUrlMobile("");
         setUrlDesktop("");
@@ -122,14 +123,14 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
                 htmlFor="id"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Image Name (3-20 chars, letters/numbers/hyphens only)
+                Image Name
               </label>
               <input
                 type="text"
-                id="id"
-                value={id}
-                onChange={(e) => setId(e.target.value)}
-                placeholder="Enter custom ID"
+                id="imageName"
+                value={imageName}
+                onChange={(e) => setImageName(e.target.value)}
+                placeholder="Enter a name for the image"
                 className="block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
                 disabled={loading}
               />

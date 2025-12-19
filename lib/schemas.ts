@@ -1,13 +1,13 @@
 import { z } from "zod";
 
 export const createLinkSchema = z.object({
-  id: z
+  imageName: z
     .string()
-    .min(3, "Custom ID must be at least 3 characters")
-    .max(20, "Custom ID must be at most 20 characters")
+    .min(3, "Image name must be at least 3 characters")
+    .max(50, "Image name must be at most 50 characters")
     .regex(
-      /^[a-zA-Z0-9-]+$/,
-      "Custom ID can only contain letters, numbers, and hyphens"
+      /^[a-zA-Z0-9\s-]+$/,
+      "Image name can only contain letters, numbers, spaces, and hyphens"
     ),
   urlMobile: z
     .string({

@@ -1,11 +1,10 @@
-
-import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { revalidatePath } from 'next/cache';
-import dbConnect from '@/lib/db';
-import Link from '@/models/Link';
-import path from 'path';
-import fs from 'fs/promises';
+import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { revalidatePath } from "next/cache";
+import dbConnect from "@/lib/db";
+import Link from "@/models/Link";
+import path from "path";
+import fs from "fs/promises";
 
 export async function DELETE(
   req: NextRequest,
@@ -14,7 +13,7 @@ export async function DELETE(
   try {
     const { id } = await params;
     // Check user authentication
-    const username = (await cookies()).get('username')?.value;
+    const username = (await cookies()).get("username")?.value;
     if (!username) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -22,8 +21,8 @@ export async function DELETE(
     // Connect to the database
     await dbConnect();
 
-    // Find the link to delete
-    const link = await Link.findOne({ id, username }).exec();
+    // Find the link to delete using imageName
+    const link = await Link.findOne({ imageName: id, username }).exec();
     if (!link) {
       return NextResponse.json(
         { error: "Link not found or you don't have permission to delete it" },
@@ -36,9 +35,12 @@ export async function DELETE(
     } catch (fileError) {
       console.warn("Could not delete image file:", fileError);
     }
-    await Link.deleteOne({ id });
-    revalidatePath('/');
-    return NextResponse.json({ success: true, message: "Link deleted successfully" });
+    await Link.deleteOne({ imageName: id });
+    revalidatePath("/");
+    return NextResponse.json({
+      success: true,
+      message: "Link deleted successfully",
+    });
   } catch (error) {
     console.error("Delete error:", error);
     return NextResponse.json(

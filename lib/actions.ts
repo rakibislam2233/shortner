@@ -34,19 +34,23 @@ export async function createLink(formData: FormData) {
 
     // Validate form data using Zod
     const rawFormData = {
-      id: formData.get("id") as string,
+      imageName: formData.get("imageName") as string,
       urlMobile: formData.get("urlMobile") as string,
       urlDesktop: (formData.get("urlDesktop") as string) || null,
       image: formData.get("image") as File,
     };
 
     const validatedData = createLinkSchema.parse(rawFormData);
+
+    // Convert spaces to underscores in imageName
+    const processedImageName = validatedData.imageName.replace(/\s+/g, '_');
+
     // Connect to the database
     await dbConnect();
-    // Check if the ID already exists - FIXED
-    const existingLink = await Link.findOne({ id: validatedData.id }).exec();
+    // Check if the imageName already exists
+    const existingLink = await Link.findOne({ imageName: processedImageName }).exec();
     if (existingLink) {
-      return { error: "ID already exists" };
+      return { error: "Image name already exists" };
     }
     // Prepare file upload
     const fileExtension = path.extname(validatedData.image.name).toLowerCase();
@@ -61,7 +65,7 @@ export async function createLink(formData: FormData) {
 
     // Create the new link in the database
     const newLink = new Link({
-      id: validatedData.id,
+      imageName: processedImageName,
       image: `/uploads/${newFilename}`,
       urlMobile: validatedData.urlMobile,
       urlDesktop: validatedData.urlDesktop || undefined,
@@ -76,7 +80,7 @@ export async function createLink(formData: FormData) {
     return {
       success: true,
       message: "Link created successfully!",
-      link: `/${validatedData.id}`,
+      link: `/${processedImageName}`,
     };
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -107,7 +111,7 @@ export async function getUserLinks() {
 
     // Fixed: Properly typed query with .exec()
     const links = await Link.find({ username })
-      .select("_id id image urlMobile urlDesktop createdAt")
+      .select("_id imageName image urlMobile urlDesktop createdAt")
       .sort({ createdAt: -1 })
       .lean()
       .exec();
@@ -120,7 +124,7 @@ export async function getUserLinks() {
 }
 
 // Delete a link - BONUS FUNCTION
-export async function deleteLink(linkId: string) {
+export async function deleteLink(imageName: string) {
   try {
     const username = (await cookies()).get("username")?.value;
     if (!username) {
@@ -131,7 +135,7 @@ export async function deleteLink(linkId: string) {
 
     // Find and delete the link if it belongs to the user
     const deletedLink = await Link.findOneAndDelete({
-      id: linkId,
+      imageName,
       username,
     }).exec();
 
@@ -168,13 +172,13 @@ export async function deleteLink(linkId: string) {
   }
 }
 
-// Get a single link by ID - BONUS FUNCTION
-export async function getLinkById(linkId: string) {
+// Get a single link by imageName - BONUS FUNCTION
+export async function getLinkById(imageName: string) {
   try {
     await dbConnect();
 
-    const link = await Link.findOne({ id: linkId })
-      .select("id image urlMobile urlDesktop")
+    const link = await Link.findOne({ imageName })
+      .select("imageName image urlMobile urlDesktop")
       .lean()
       .exec();
 
