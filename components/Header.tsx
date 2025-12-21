@@ -1,13 +1,21 @@
 "use client";
 
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
-export default function Header({ initialUsername }: { initialUsername?: string }) {
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { logout } from "@/lib/api";
+import { motion } from "framer-motion";
+
+export default function Header({
+  initialUsername,
+}: {
+  initialUsername?: string;
+}) {
   const router = useRouter();
-  const [username, setUsername] = useState<string>(initialUsername ?? '');
+  const [username, setUsername] = useState<string>(initialUsername ?? "");
+
   useEffect(() => {
-    if (!username && typeof document !== 'undefined') {
+    if (!username && typeof document !== "undefined") {
       const match = document.cookie.match(/(?:^|;\s*)username=([^;]+)/);
       if (match) {
         setUsername(decodeURIComponent(match[1]));
@@ -17,22 +25,40 @@ export default function Header({ initialUsername }: { initialUsername?: string }
 
   const handleLogout = async () => {
     try {
-      const res = await fetch('/api/logout', { method: 'POST' });
-      if (res.ok) {
-        toast.success('Logged out successfully');
-        router.push('/login');
-      } else {
-        toast.error('Logout failed');
+      const token = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("accessToken="))
+        ?.split("=")[1];
+
+      if (token) {
+        await logout(token);
       }
+
+      // Clear all cookies
+      document.cookie = "accessToken=; Max-Age=-99999999; path=/";
+      document.cookie = "refreshToken=; Max-Age=-99999999; path=/";
+      document.cookie = "username=; Max-Age=-99999999; path=/";
+
+      toast.success("Logged out successfully");
+      router.push("/login");
     } catch (err) {
       console.error(err);
-      toast.error('An unexpected error occurred');
+      toast.error("Logout failed");
+
+      // Clear cookies anyway
+      document.cookie = "accessToken=; Max-Age=-99999999; path=/";
+      document.cookie = "refreshToken=; Max-Age=-99999999; path=/";
+      document.cookie = "username=; Max-Age=-99999999; path=/";
+      router.push("/login");
     }
   };
 
   return (
-    <header
-      className="w-full mb-8 flex items-center justify-between rounded-lg shadow-md p-4 bg-gradient-to-l from-blue-600 via-purple-600 to-pink-600 text-white animate-fade-in"
+    <motion.header
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="w-full mb-8 flex items-center justify-between rounded-lg shadow-md p-4 bg-gradient-to-l from-blue-600 via-purple-600 to-pink-600 text-white"
     >
       <div className="flex flex-col lg:flex-row items-center space-x-2 text-xl md:text-2xl tracking-tight font-bold ">
         {/* App logo icon (simple link icon) */}
@@ -80,7 +106,9 @@ export default function Header({ initialUsername }: { initialUsername?: string }
           </span>
         )}
         {username && (
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={handleLogout}
             className="flex items-center bg-white/20 hover:bg-red-600 text-white px-3 py-1 md:px-4 md:py-2 rounded transition-colors duration-300"
           >
@@ -100,9 +128,9 @@ export default function Header({ initialUsername }: { initialUsername?: string }
               />
             </svg>
             Logout
-          </button>
+          </motion.button>
         )}
       </div>
-    </header>
+    </motion.header>
   );
 }

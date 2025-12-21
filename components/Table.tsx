@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import AddUrlButton from "./AddUrlButton";
-import { getUserLinks } from "@/lib/actions";
 import { toast } from "sonner";
 import Link from "next/link";
+import { deleteLink } from "@/lib/api";
 
 interface LinkEntry {
   _id: string;
@@ -38,9 +38,8 @@ export default function Table({ initialLinks }: TableProps) {
     }
   }, []);
 
-  const handleCreated = async () => {
-    const updatedLinks = await getUserLinks();
-    setLinks(updatedLinks as LinkEntry[]);
+  const handleCreated = (newLink: LinkEntry) => {
+    setLinks(prev => [newLink, ...prev]);
   };
 
   // Filter the list based on the search term
@@ -49,8 +48,8 @@ export default function Table({ initialLinks }: TableProps) {
   );
 
   // Open delete modal
-  const openDeleteModal = (imageName: string) => {
-    setLinkToDelete(imageName);
+  const openDeleteModal = (linkId: string) => {
+    setLinkToDelete(linkId);
     setDeleteModalOpen(true);
   };
 
@@ -67,23 +66,23 @@ export default function Table({ initialLinks }: TableProps) {
 
     setDeleting(true);
     try {
-      const res = await fetch(`/api/delete/${linkToDelete}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        setLinks((prev) =>
-          prev.filter((item) => item.imageName !== linkToDelete)
-        );
-        await handleCreated();
-        toast.success("Link deleted successfully");
-        closeDeleteModal();
-      } else {
-        const errorData = await res.json();
-        toast.error(errorData.error || "Failed to delete link");
+      const token = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('accessToken='))
+        ?.split('=')[1];
+
+      if (!token) {
+        toast.error("Authentication required");
+        return;
       }
+
+      await deleteLink(token, linkToDelete);
+      setLinks((prev) => prev.filter((item) => item._id !== linkToDelete));
+      toast.success("Link deleted successfully");
+      closeDeleteModal();
     } catch (err) {
       console.error(err);
-      toast.error("An unexpected error occurred while deleting");
+      toast.error("Failed to delete link");
     } finally {
       setDeleting(false);
     }
@@ -138,10 +137,10 @@ export default function Table({ initialLinks }: TableProps) {
             {/* Body */}
             <div className="px-6 py-8 text-center space-y-4">
               <p className="text-gray-700">
-                Are you sure you want to delete the entry
+                Are you sure you want to delete this link?
               </p>
               <p className="text-lg font-semibold text-red-600">
-                "{linkToDelete}"
+                "{links.find(l => l._id === linkToDelete)?.imageName}"
               </p>
               <p className="text-sm text-gray-500">
                 This action cannot be undone.
@@ -301,7 +300,7 @@ export default function Table({ initialLinks }: TableProps) {
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-red-600">
                       <button
-                        onClick={() => openDeleteModal(link.imageName)}
+                        onClick={() => openDeleteModal(link._id)}
                         className="underline hover:text-red-700 transition-colors duration-200"
                       >
                         Delete

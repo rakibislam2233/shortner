@@ -6,20 +6,8 @@ html, body, :root {
   height: 100%;
 }
 body {
-  /* Use a soft gradient background across the whole app for a more
-     polished and attractive appearance. */
   @apply bg-gradient-to-br from-gray-100 via-purple-50 to-pink-50 text-gray-900;
 }
-
-/*
-  Custom animations and utility classes. These classes are defined
-  alongside Tailwind's base styles and can be applied to elements
-  to produce smooth entrance effects and transitions.
-
-  animate-fade-in: Fades an element in while slightly translating it
-  upward. Useful for components that should gracefully appear on
-  initial render.
-*/
 
 @layer utilities {
   @keyframes fadeIn {

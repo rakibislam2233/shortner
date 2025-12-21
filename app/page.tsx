@@ -1,29 +1,52 @@
-// Fixed: Updated home page with database validation
-import { getUserLinks } from '@/lib/actions';
-import dbConnect from '@/lib/db';
-import User from '@/models/User';
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+"use client";
+
+import { useState, useEffect } from "react";
 import Header from "../components/Header";
 import Table from "../components/Table";
+import { getMyLinks } from "@/lib/api";
 
-export default async function HomePage() {
-  const username = (await cookies()).get('username')?.value;
-  if (!username) {
-    redirect("/login");
-  }
-  await dbConnect();
-  const user = await User.findOne({ username }).exec();
-  if (!user) {
-    redirect("/login");
+export default function HomePage() {
+  const [initialLinks, setInitialLinks] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLinks = async () => {
+      try {
+        const token = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('accessToken='))
+          ?.split('=')[1];
+
+        if (!token) {
+          window.location.href = "/login";
+          return;
+        }
+
+        const response = await getMyLinks(token);
+        setInitialLinks(response.data || []);
+      } catch (error) {
+        console.error("Error fetching links:", error);
+        window.location.href = "/login";
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLinks();
+  }, []);
+
+  if (loading) {
+    return <div className="text-center py-10">Loading...</div>;
   }
 
-  // Get user's links from the database
-  const initialLinks = await getUserLinks();
+  const username = document.cookie
+    .split('; ')
+    .find(row => row.startsWith('username='))
+    ?.split('=')[1];
 
   return (
     <>
-      <Header initialUsername={username} />
+      <Header initialUsername={username ? decodeURIComponent(username) : ''} />
       <Table initialLinks={initialLinks} />
     </>
   );

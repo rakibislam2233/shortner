@@ -2,10 +2,11 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
+import { createLink } from "@/lib/api";
 
 interface AddUrlModalProps {
   onClose: () => void;
-  onCreated: () => void;
+  onCreated: (newLink: any) => void;
 }
 export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
   const [imageName, setImageName] = useState("");
@@ -52,6 +53,17 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
     }
 
     try {
+      const token = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('accessToken='))
+        ?.split('=')[1];
+
+      if (!token) {
+        toast.error("Authentication required");
+        setLoading(false);
+        return;
+      }
+
       const formData = new FormData();
       formData.append("imageName", imageName.trim());
       formData.append("image", imageFile);
@@ -60,13 +72,9 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
         formData.append("urlDesktop", urlDesktop.trim());
       }
 
-      const res = await fetch("/api/create", {
-        method: "POST",
-        body: formData,
-      });
-      if (res.ok) {
-        await res.json();
-        onCreated();
+      const response = await createLink(token, formData);
+      if (response.success) {
+        onCreated(response.data);
         toast.success("Link created successfully!");
 
         // Clear form
@@ -78,12 +86,11 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
 
         onClose();
       } else {
-        const errorData = await res.json().catch(() => ({}));
-        toast.error(errorData.error || "Failed to create link");
+        toast.error(response.message || "Failed to create link");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      toast.error("An unexpected error occurred.");
+      toast.error(err.message || "An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
