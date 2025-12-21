@@ -1,11 +1,11 @@
 "use client";
-
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import AddUrlButton from "./AddUrlButton";
 import { toast } from "sonner";
 import Link from "next/link";
-import { deleteLink } from "@/lib/api";
+import { deleteLink, getMyLinks } from "@/lib/api";
+import { motion } from "framer-motion";
 
 interface LinkEntry {
   _id: string;
@@ -16,12 +16,9 @@ interface LinkEntry {
   createdAt: string;
 }
 
-interface TableProps {
-  initialLinks: LinkEntry[];
-}
-
-export default function Table({ initialLinks }: TableProps) {
-  const [links, setLinks] = useState<LinkEntry[]>(initialLinks);
+export default function Table() {
+  const [links, setLinks] = useState<LinkEntry[]>([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [origin, setOrigin] = useState("");
 
@@ -32,14 +29,58 @@ export default function Table({ initialLinks }: TableProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    const fetchLinks = async () => {
+      try {
+        const token = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('accessToken='))
+          ?.split('=')[1];
+
+        if (!token) {
+          toast.error("Authentication required");
+          return;
+        }
+
+        const response = await getMyLinks(token);
+        setLinks(response.data || []);
+      } catch (error) {
+        console.error("Error fetching links:", error);
+        toast.error("Failed to load links");
+      } finally {
+        setLoading(false);
+      }
+    };
+
     if (typeof window !== "undefined") {
       setOrigin(window.location.origin);
       setMounted(true);
+      fetchLinks();
     }
   }, []);
 
   const handleCreated = (newLink: LinkEntry) => {
-    setLinks(prev => [newLink, ...prev]);
+    setLinks((prev) => [newLink, ...prev]);
+  };
+
+  // Function to refresh links
+  const refreshLinks = async () => {
+    try {
+      const token = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('accessToken='))
+        ?.split('=')[1];
+
+      if (!token) {
+        toast.error("Authentication required");
+        return;
+      }
+
+      const response = await getMyLinks(token);
+      setLinks(response.data || []);
+    } catch (error) {
+      console.error("Error refreshing links:", error);
+      toast.error("Failed to refresh links");
+    }
   };
 
   // Filter the list based on the search term
@@ -67,9 +108,9 @@ export default function Table({ initialLinks }: TableProps) {
     setDeleting(true);
     try {
       const token = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('accessToken='))
-        ?.split('=')[1];
+        .split("; ")
+        .find((row) => row.startsWith("accessToken="))
+        ?.split("=")[1];
 
       if (!token) {
         toast.error("Authentication required");
@@ -140,7 +181,7 @@ export default function Table({ initialLinks }: TableProps) {
                 Are you sure you want to delete this link?
               </p>
               <p className="text-lg font-semibold text-red-600">
-                "{links.find(l => l._id === linkToDelete)?.imageName}"
+                "{links.find((l) => l._id === linkToDelete)?.imageName}"
               </p>
               <p className="text-sm text-gray-500">
                 This action cannot be undone.
@@ -183,7 +224,7 @@ export default function Table({ initialLinks }: TableProps) {
           <h1 className="text-2xl font-bold tracking-tighter text-gray-800 border-l-4 border-blue-600 pl-3">
             Your Links
           </h1>
-          <AddUrlButton onCreated={handleCreated} />
+          <AddUrlButton onCreated={refreshLinks} />
         </div>
 
         {/* Search input */}
@@ -252,8 +293,11 @@ export default function Table({ initialLinks }: TableProps) {
                 </tr>
               ) : (
                 filtered.map((link, idx) => (
-                  <tr
+                  <motion.tr
                     key={link._id}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
                     className="hover:bg-gray-50 odd:bg-gray-50 even:bg-white transition-colors"
                   >
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
@@ -306,7 +350,7 @@ export default function Table({ initialLinks }: TableProps) {
                         Delete
                       </button>
                     </td>
-                  </tr>
+                  </motion.tr>
                 ))
               )}
             </tbody>

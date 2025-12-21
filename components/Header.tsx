@@ -1,27 +1,11 @@
 "use client";
-
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { logout } from "@/lib/api";
 import { motion } from "framer-motion";
 
-export default function Header({
-  initialUsername,
-}: {
-  initialUsername?: string;
-}) {
+export default function Header() {
   const router = useRouter();
-  const [username, setUsername] = useState<string>(initialUsername ?? "");
-
-  useEffect(() => {
-    if (!username && typeof document !== "undefined") {
-      const match = document.cookie.match(/(?:^|;\s*)username=([^;]+)/);
-      if (match) {
-        setUsername(decodeURIComponent(match[1]));
-      }
-    }
-  }, [username]);
 
   const handleLogout = async () => {
     try {
@@ -37,7 +21,6 @@ export default function Header({
       // Clear all cookies
       document.cookie = "accessToken=; Max-Age=-99999999; path=/";
       document.cookie = "refreshToken=; Max-Age=-99999999; path=/";
-      document.cookie = "username=; Max-Age=-99999999; path=/";
 
       toast.success("Logged out successfully");
       router.push("/login");
@@ -55,8 +38,8 @@ export default function Header({
 
   return (
     <motion.header
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       className="w-full mb-8 flex items-center justify-between rounded-lg shadow-md p-4 bg-gradient-to-l from-blue-600 via-purple-600 to-pink-600 text-white"
     >
@@ -85,51 +68,47 @@ export default function Header({
         <span>Nobita Shortener</span>
       </div>
       <div className="flex flex-col lg:flex-row lg:items-center items-end gap-4">
-        {username && (
-          <span className="flex items-center text-sm md:text-base font-medium">
-            {/* User icon */}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 mr-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
-            {username}
-          </span>
-        )}
-        {username && (
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleLogout}
-            className="flex items-center bg-white/20 hover:bg-red-600 text-white px-3 py-1 md:px-4 md:py-2 rounded transition-colors duration-300"
+        <span className="flex items-center text-sm md:text-base font-medium">
+          {/* User icon */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 mr-1"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
-            {/* Sign-out icon */}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 mr-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 11-6 0V7a3 3 0 016 0v1"
-              />
-            </svg>
-            Logout
-          </motion.button>
-        )}
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+            />
+          </svg>
+          <h1>Rakib</h1>
+        </span>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleLogout}
+          className="flex items-center bg-white/20 hover:bg-red-600 text-white px-3 py-1 md:px-4 md:py-2 rounded transition-colors duration-300"
+        >
+          {/* Sign-out icon */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 mr-1"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 11-6 0V7a3 3 0 016 0v1"
+            />
+          </svg>
+          Logout
+        </motion.button>
       </div>
     </motion.header>
   );

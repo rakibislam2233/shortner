@@ -1,44 +1,49 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://10.10.11.17:6590/api/v1';
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "https://rakib8080.sobhoy.com/api/v1";
 
 // Helper function to make API requests
 const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...options.headers,
     },
   });
 
   const data = await response.json();
-  
+
   if (!response.ok) {
-    throw new Error(data.message || 'Request failed');
+    throw new Error(data.message || "Request failed");
   }
-  
+
   return data;
 };
 
 // Authentication functions
 export const login = async (email: string, password: string) => {
-  return apiRequest('/auth/login', {
-    method: 'POST',
+  return apiRequest("/auth/login", {
+    method: "POST",
     body: JSON.stringify({ email, password }),
   });
 };
 
-export const register = async (fullName: string, email: string, password: string) => {
-  return apiRequest('/auth/register', {
-    method: 'POST',
+export const register = async (
+  fullName: string,
+  email: string,
+  password: string
+) => {
+  return apiRequest("/auth/register", {
+    method: "POST",
     body: JSON.stringify({ fullName, email, password }),
   });
 };
 
 // Link functions
 export const getMyLinks = async (token: string) => {
-  return apiRequest('/links', {
+  return apiRequest("/links", {
     headers: {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
   });
 };
@@ -46,10 +51,12 @@ export const getMyLinks = async (token: string) => {
 export const getLinkBySlug = async (slug: string) => {
   return apiRequest(`/links/slug/${slug}`, {
     headers: {
-      'Authorization': `Bearer ${document.cookie
-        .split('; ')
-        .find(row => row.startsWith('accessToken='))
-        ?.split('=')[1] || ''}`,
+      Authorization: `Bearer ${
+        document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("accessToken="))
+          ?.split("=")[1] || ""
+      }`,
     },
   });
 };
@@ -57,66 +64,69 @@ export const getLinkBySlug = async (slug: string) => {
 export const createLink = async (token: string, linkData: FormData) => {
   // For form data, we don't set Content-Type header as it will be set automatically
   const response = await fetch(`${API_BASE_URL}/links`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
     body: linkData,
   });
 
   const data = await response.json();
-  
+
   if (!response.ok) {
-    throw new Error(data.message || 'Request failed');
+    throw new Error(data.message || "Request failed");
   }
-  
+
   return data;
 };
 
 export const deleteLink = async (token: string, linkId: string) => {
   return apiRequest(`/links/${linkId}`, {
-    method: 'DELETE',
+    method: "DELETE",
     headers: {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
   });
 };
 
 export const getProfile = async (token: string) => {
-  return apiRequest('/users/profile/me', {
+  return apiRequest("/users/profile/me", {
     headers: {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
   });
 };
 
 export const updateProfile = async (token: string, profileData: FormData) => {
   const response = await fetch(`${API_BASE_URL}/users/profile/update`, {
-    method: 'PATCH',
+    method: "PATCH",
     headers: {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
     body: profileData,
   });
 
   const data = await response.json();
-  
+
   if (!response.ok) {
-    throw new Error(data.message || 'Request failed');
+    throw new Error(data.message || "Request failed");
   }
-  
+
   return data;
 };
 
 export const logout = async (token: string) => {
-  return apiRequest('/auth/logout', {
-    method: 'POST',
-    body: JSON.stringify({ refreshToken: document.cookie
-      .split('; ')
-      .find(row => row.startsWith('refreshToken='))
-      ?.split('=')[1] || '' }),
+  return apiRequest("/auth/logout", {
+    method: "POST",
+    body: JSON.stringify({
+      refreshToken:
+        document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("refreshToken="))
+          ?.split("=")[1] || "",
+    }),
     headers: {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
   });
 };

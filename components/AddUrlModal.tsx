@@ -3,10 +3,11 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { createLink } from "@/lib/api";
+import { motion } from 'framer-motion';
 
 interface AddUrlModalProps {
   onClose: () => void;
-  onCreated: (newLink: any) => void;
+  onCreated: () => void;
 }
 export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
   const [imageName, setImageName] = useState("");
@@ -74,7 +75,7 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
 
       const response = await createLink(token, formData);
       if (response.success) {
-        onCreated(response.data);
+        onCreated(); // Call refresh function to update the table
         toast.success("Link created successfully!");
 
         // Clear form
@@ -109,7 +110,13 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
         className="flex lg:h-screen w-screen items-center justify-center p-4"
         onClick={(e) => e.stopPropagation()} // prevent overlay click
       >
-        <div className="bg-white rounded-lg shadow-2xl w-full max-w-md animate-fade-in mt-20 lg:mt-0">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          className="bg-white rounded-lg shadow-2xl w-full max-w-md mt-20 lg:mt-0"
+        >
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 px-6 py-4 flex justify-between items-center rounded-t-lg">
             <h2 className="text-lg font-semibold text-white">Add Link</h2>
@@ -216,7 +223,7 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
               </button>
             </div>
           </form>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
