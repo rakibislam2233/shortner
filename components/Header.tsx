@@ -3,8 +3,11 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { logout } from "@/lib/api";
 import { motion } from "framer-motion";
+import { useAuth } from "@/hook/useAuth";
+import Link from "next/link";
 
 export default function Header() {
+  const { user, isAuthenticated } = useAuth();
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -67,49 +70,57 @@ export default function Header() {
         </svg>
         <span>Nobita Shortener</span>
       </div>
-      <div className="flex flex-col lg:flex-row lg:items-center items-end gap-4">
-        <span className="flex items-center text-sm md:text-base font-medium">
-          {/* User icon */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 mr-1"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+      {isAuthenticated ? (
+        <div className="flex flex-col lg:flex-row lg:items-center items-end gap-4">
+          <span className="flex items-center text-sm md:text-base font-medium">
+            {/* User icon */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 mr-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+            </svg>
+            <h1>Rakib</h1>
+          </span>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleLogout}
+            className="flex items-center bg-white/20 hover:bg-red-600 text-white px-3 py-1 md:px-4 md:py-2 rounded transition-colors duration-300"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-            />
-          </svg>
-          <h1>Rakib</h1>
-        </span>
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleLogout}
-          className="flex items-center bg-white/20 hover:bg-red-600 text-white px-3 py-1 md:px-4 md:py-2 rounded transition-colors duration-300"
-        >
-          {/* Sign-out icon */}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 mr-1"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 11-6 0V7a3 3 0 016 0v1"
-            />
-          </svg>
-          Logout
-        </motion.button>
-      </div>
+            {/* Sign-out icon */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 mr-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 11-6 0V7a3 3 0 016 0v1"
+              />
+            </svg>
+            Logout
+          </motion.button>
+        </div>
+      ) : (
+        <Link href="/login">
+          <motion.button className="flex items-center bg-pink-600 text-white px-3 py-1 md:px-4 md:py-2 rounded transition-colors duration-300">
+            Login
+          </motion.button>
+        </Link>
+      )}
     </motion.header>
   );
 }

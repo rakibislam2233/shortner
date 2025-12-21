@@ -1,5 +1,6 @@
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "https://rakib8080.sobhoy.com/api/v1";
+  `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1` ||
+  "https://rakib8080.sobhoy.com/api/v1";
 
 // Helper function to make API requests
 const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
@@ -48,15 +49,11 @@ export const getMyLinks = async (token: string) => {
   });
 };
 
-export const getLinkBySlug = async (slug: string) => {
+export const getLinkBySlug = async (slug: string, token: string) => {
   return apiRequest(`/links/slug/${slug}`, {
     headers: {
-      Authorization: `Bearer ${
-        document.cookie
-          .split("; ")
-          .find((row) => row.startsWith("accessToken="))
-          ?.split("=")[1] || ""
-      }`,
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
     },
   });
 };

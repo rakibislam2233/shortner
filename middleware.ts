@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
+  // Check if accessing the home page
+  if (request.nextUrl.pathname === "/") {
+    const accessToken = request.cookies.get("accessToken")?.value;
+    const refreshToken = request.cookies.get("refreshToken")?.value;
+
+    // If no tokens exist, redirect to login
+    if (!accessToken || !refreshToken) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+  }
+
   const response = NextResponse.next();
 
   // Strict Transport Security
@@ -27,7 +38,6 @@ export function middleware(request: NextRequest) {
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' blob: data: https:",
       "font-src 'self'",
-      // ADD YOUR PRODUCTION API DOMAIN HERE
       "connect-src 'self' https://rakib8080.sobhoy.com https://api.brcanva.com/",
       "frame-ancestors 'none'",
       "upgrade-insecure-requests",

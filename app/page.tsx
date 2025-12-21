@@ -1,11 +1,12 @@
-import Header from "../components/Header";
+"use client";
+import ProtectedRoute from "@/components/ProtectedRoute ";
 import Table from "../components/Table";
+import Header from "@/components/Header";
 
 export default function HomePage() {
   return (
-    <section className="w-full">
-      <Header />
+    <ProtectedRoute>
       <Table />
-    </section>
+    </ProtectedRoute>
   );
 }

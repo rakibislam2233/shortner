@@ -67,14 +67,14 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
 
       const formData = new FormData();
       formData.append("imageName", imageName.trim());
-      formData.append("image", imageFile);
+      formData.append("linkImage", imageFile);
       formData.append("urlMobile", urlMobile.trim());
       if (urlDesktop.trim()) {
         formData.append("urlDesktop", urlDesktop.trim());
       }
 
       const response = await createLink(token, formData);
-      if (response.success) {
+      if (response.code === 201) {
         onCreated(); // Call refresh function to update the table
         toast.success("Link created successfully!");
 
@@ -108,7 +108,7 @@ export default function AddUrlModal({ onClose, onCreated }: AddUrlModalProps) {
       {/* Centering wrapper with spacing */}
       <div
         className="flex lg:h-screen w-screen items-center justify-center p-4"
-        onClick={(e) => e.stopPropagation()} // prevent overlay click
+        onClick={(e) => e.stopPropagation()} 
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}

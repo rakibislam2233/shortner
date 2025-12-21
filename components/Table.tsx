@@ -5,11 +5,12 @@ import AddUrlButton from "./AddUrlButton";
 import { toast } from "sonner";
 import Link from "next/link";
 import { deleteLink, getMyLinks } from "@/lib/api";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
-interface LinkEntry {
+export interface LinkEntry {
   _id: string;
   imageName: string;
+  slug: string;
   image: string;
   urlMobile: string;
   urlDesktop?: string;
@@ -32,9 +33,9 @@ export default function Table() {
     const fetchLinks = async () => {
       try {
         const token = document.cookie
-          .split('; ')
-          .find(row => row.startsWith('accessToken='))
-          ?.split('=')[1];
+          .split("; ")
+          .find((row) => row.startsWith("accessToken="))
+          ?.split("=")[1];
 
         if (!token) {
           toast.error("Authentication required");
@@ -58,17 +59,13 @@ export default function Table() {
     }
   }, []);
 
-  const handleCreated = (newLink: LinkEntry) => {
-    setLinks((prev) => [newLink, ...prev]);
-  };
-
   // Function to refresh links
   const refreshLinks = async () => {
     try {
       const token = document.cookie
-        .split('; ')
-        .find(row => row.startsWith('accessToken='))
-        ?.split('=')[1];
+        .split("; ")
+        .find((row) => row.startsWith("accessToken="))
+        ?.split("=")[1];
 
       if (!token) {
         toast.error("Authentication required");
@@ -129,10 +126,9 @@ export default function Table() {
     }
   };
 
-  // Delete Confirmation Modal Component (styled like AddUrlModal)
+  // Beautiful Delete Confirmation Modal
   const DeleteModal = () => {
     useEffect(() => {
-      // Lock scroll
       document.body.style.overflow = "hidden";
 
       const handleEsc = (e: KeyboardEvent) => {
@@ -149,68 +145,160 @@ export default function Table() {
     if (!deleteModalOpen || !mounted) return null;
 
     const modalContent = (
-      <div
-        className="fixed inset-0 z-[9999] bg-black/50"
-        role="dialog"
-        aria-modal="true"
-        onClick={closeDeleteModal}
-      >
-        <div
-          className="flex lg:h-screen w-screen items-center justify-center p-4"
-          onClick={(e) => e.stopPropagation()}
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          onClick={closeDeleteModal}
         >
-          <div className="bg-white rounded-lg shadow-2xl w-full max-w-md animate-fade-in mt-20 lg:mt-0">
-            {/* Gradient Header */}
-            <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 px-6 py-4 flex justify-between items-center rounded-t-lg">
-              <h2 className="text-lg font-semibold text-white">
-                Confirm Delete
-              </h2>
-              <button
-                onClick={closeDeleteModal}
-                className="text-white/90 hover:text-white transition"
-                aria-label="Close modal"
-                disabled={deleting}
-              >
-                ✕
-              </button>
-            </div>
+          <div
+            className="flex min-h-screen w-screen items-center justify-center p-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+            >
+              {/* Animated Warning Icon */}
+              <div className="bg-gradient-to-br from-red-50 to-pink-50 px-6 pt-8 pb-4 flex flex-col items-center">
+                <motion.div
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                  className="w-20 h-20 bg-gradient-to-br from-red-500 to-pink-600 rounded-full flex items-center justify-center shadow-lg mb-4"
+                >
+                  <svg
+                    className="w-10 h-10 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2.5}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                  </svg>
+                </motion.div>
 
-            {/* Body */}
-            <div className="px-6 py-8 text-center space-y-4">
-              <p className="text-gray-700">
-                Are you sure you want to delete this link?
-              </p>
-              <p className="text-lg font-semibold text-red-600">
-                "{links.find((l) => l._id === linkToDelete)?.imageName}"
-              </p>
-              <p className="text-sm text-gray-500">
-                This action cannot be undone.
-              </p>
-            </div>
+                <motion.h2
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-2xl font-bold text-gray-800"
+                >
+                  Delete Link?
+                </motion.h2>
+              </div>
 
-            {/* Actions */}
-            <div className="flex items-center justify-between px-6 pb-6 pt-2">
-              <button
-                type="button"
-                onClick={closeDeleteModal}
-                className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-6 py-2 rounded-md transition disabled:opacity-50"
-                disabled={deleting}
+              {/* Body */}
+              <div className="px-6 py-6 space-y-4">
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="text-center space-y-3"
+                >
+                  <p className="text-gray-600 text-base">
+                    Are you sure you want to delete this link?
+                  </p>
+
+                  <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                      />
+                    </svg>
+                    <span>This action cannot be undone</span>
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Actions */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="flex items-center gap-3 px-6 pb-6 pt-2"
               >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDelete}
-                className={`bg-gradient-to-r from-red-600 to-pink-600 hover:opacity-90 text-white px-6 py-2 rounded-md shadow transition-opacity duration-200 ${
-                  deleting ? "opacity-70 cursor-not-allowed" : ""
-                }`}
-                disabled={deleting}
-              >
-                {deleting ? "Deleting..." : "Delete"}
-              </button>
-            </div>
+                <button
+                  type="button"
+                  onClick={closeDeleteModal}
+                  disabled={deleting}
+                  className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold px-6 py-3 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed border border-gray-200 hover:border-gray-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  disabled={deleting}
+                  className="flex-1 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                >
+                  {deleting ? (
+                    <>
+                      <svg
+                        className="animate-spin h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      <span>Deleting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
+                      </svg>
+                      <span>Delete</span>
+                    </>
+                  )}
+                </button>
+              </motion.div>
+            </motion.div>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </AnimatePresence>
     );
 
     return createPortal(modalContent, document.body);
@@ -292,12 +380,9 @@ export default function Table() {
                   </td>
                 </tr>
               ) : (
-                filtered.map((link, idx) => (
+                filtered?.map((link, idx) => (
                   <motion.tr
                     key={link._id}
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
                     className="hover:bg-gray-50 odd:bg-gray-50 even:bg-white transition-colors"
                   >
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
@@ -331,8 +416,8 @@ export default function Table() {
                       )}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-blue-700">
-                      <Link
-                        href={`/${link.imageName}`}
+                      <a
+                        href={`/${link.slug}`}
                         className="underline"
                         target="_blank"
                         rel="noreferrer"
@@ -340,7 +425,7 @@ export default function Table() {
                         {origin
                           ? `${origin}/${link.imageName}`
                           : `/${link.imageName}`}
-                      </Link>
+                      </a>
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap text-sm text-red-600">
                       <button
