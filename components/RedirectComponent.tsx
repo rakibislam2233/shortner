@@ -35,7 +35,8 @@ export default function RedirectComponent({
     if (validatedTarget) {
       const timer = setTimeout(() => {
         window.location.href = validatedTarget!;
-      }, 1000);
+      }, 500); 
+
       return () => clearTimeout(timer);
     }
   }, [urlMobile, urlDesktop]);
