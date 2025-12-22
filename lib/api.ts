@@ -42,7 +42,7 @@ export const register = async (
 
 // Link functions
 export const getMyLinks = async (token: string) => {
-  return apiRequest("/links", {
+  return apiRequest("/links/user", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
