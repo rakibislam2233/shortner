@@ -4,7 +4,6 @@ import { toast } from "sonner";
 import { logout } from "@/lib/api";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hook/useAuth";
-import Link from "next/link";
 
 export default function Header() {
   const { user, isAuthenticated } = useAuth();
@@ -40,12 +39,7 @@ export default function Header() {
   };
 
   return (
-    <motion.header
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="w-full mb-8 flex items-center justify-between rounded-lg shadow-md p-4 bg-gradient-to-l from-blue-600 via-purple-600 to-pink-600 text-white"
-    >
+    <header className="mb-8 flex items-center justify-between rounded-lg shadow-md px-4 py-5 bg-gradient-to-l from-blue-600 via-purple-600 to-pink-600 text-white animate-fade-in">
       <div className="flex flex-col lg:flex-row items-center space-x-2 text-xl md:text-2xl tracking-tight font-bold ">
         {/* App logo icon (simple link icon) */}
         <svg
@@ -70,7 +64,7 @@ export default function Header() {
         </svg>
         <span>Nobita Shortener</span>
       </div>
-      {isAuthenticated ? (
+      {isAuthenticated && (
         <div className="flex flex-col lg:flex-row lg:items-center items-end gap-4">
           <span className="flex items-center text-sm md:text-base font-medium">
             {/* User icon */}
@@ -114,13 +108,7 @@ export default function Header() {
             Logout
           </motion.button>
         </div>
-      ) : (
-        <Link href="/login">
-          <motion.button className="flex items-center bg-pink-600 text-white px-3 py-1 md:px-4 md:py-2 rounded transition-colors duration-300">
-            Login
-          </motion.button>
-        </Link>
       )}
-    </motion.header>
+    </header>
   );
 }

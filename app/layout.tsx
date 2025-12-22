@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Toaster } from "sonner";
-import Header from "@/components/Header";
+
 
 export const metadata: Metadata = {
   title: {
@@ -66,7 +66,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className="mx-auto max-w-6xl p-4 md:p-8">
-        <Header />
         {children}
         <Toaster position="top-center" richColors />
       </body>
