@@ -3,9 +3,15 @@ const nextConfig = {
   reactStrictMode: true,
 
   images: {
-    unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "rakib8080.sobhoy.com",
+        port: "",
+        pathname: "/**",
+      },
+    ],
   },
-  swcMinify: true,
 
   env: {
     NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL,
