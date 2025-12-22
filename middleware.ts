@@ -23,11 +23,12 @@ export function middleware(request: NextRequest) {
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "Content-Security-Policy": [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com https://challenges.cloudflare.com",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' blob: data: https:",
+      "img-src 'self' blob: data: https: http:",
       "font-src 'self' data:",
-      "connect-src 'self' https://rakib8080.sobhoy.com https://api.brcanva.com",
+      "connect-src 'self' https://rakib8080.sobhoy.com https://api.brcanva.com https://cloudflareinsights.com",
+      "frame-src https://challenges.cloudflare.com",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
@@ -52,13 +53,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except:
-     * - api routes
-     * - _next/static (static files)
-     * - _next/image (image optimization)
-     * - favicon.ico, sitemap.xml, robots.txt
-     */
     "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)",
   ],
 };

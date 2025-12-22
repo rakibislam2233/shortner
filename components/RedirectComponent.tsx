@@ -1,8 +1,7 @@
 "use client";
-import { useEffect, useState } from "react";
-
+import { useEffect } from "react";
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "https://rakib8080.sobhoy.com/api/v1";
+  process.env.NEXT_PUBLIC_API_BASE_URL || "https://rakib8080.sobhoy.com";
 
 interface Props {
   image: string;
@@ -56,7 +55,7 @@ export default function RedirectComponent({
       <img
         src={imageUrl}
         alt="Loading"
-        className="lg:max-w-[800px] lg:aspect-[4:3] w-full mx-auto"
+        className="lg:max-w-[800px] lg:aspect-[4:3] w-full mx-auto rounded"
       />
     </div>
   );
